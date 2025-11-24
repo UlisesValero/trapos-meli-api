@@ -26,7 +26,7 @@ const ProductCacheSchema = new mongoose.Schema(
     raw: { type: Object },
   },
   {
-    collection: "productcaches",
+    collection: "ProductCache",
   }
 );
 

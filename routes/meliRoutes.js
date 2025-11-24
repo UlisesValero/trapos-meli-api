@@ -6,10 +6,8 @@ import { getAuthUrl, exchangeCodeForToken } from "../utils/meliAuth.js";
 const router = express.Router();
 
 router.get("/auth/meli", (req, res) => {
-    console.log("estoy acá");
     const url = getAuthUrl();
-    console.log("aca llegue");
-    res.redirect(url); // 302 a Mercado Libre
+    res.redirect(url)
 });
 
 // CALLBACK OAUTH
