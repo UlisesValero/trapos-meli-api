@@ -4,7 +4,7 @@ import * as ctrl from "../controllers/meliController.js";
 
 const router = express.Router();
 
-router.get("/products", ctrl.listProducts);
+router.get("/", ctrl.listProducts);
 router.post("/products/sync", ctrl.syncProducts);
 router.put("/products/:id", ctrl.updateProduct);
 router.delete("/products/:id", ctrl.deleteProduct);
