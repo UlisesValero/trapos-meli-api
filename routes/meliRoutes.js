@@ -13,7 +13,6 @@ router.get("/auth/meli", (req, res) => {
 // CALLBACK OAUTH
 router.get("/auth/meli/callback", async (req, res) => {
     try {
-        console.log("CALLBACK QUERY:", req.query)
         const { code } = req.query;
         const tokenDoc = await exchangeCodeForToken(code);
         res.json({ ok: true, token: tokenDoc });

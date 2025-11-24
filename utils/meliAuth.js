@@ -31,12 +31,10 @@ export async function exchangeCodeForToken(code) {
         redirect_uri: process.env.MELI_REDIRECT_URI
     };
 
-    console.log(body)
     const { data } = await axios.post(TOKEN_URL, qs.stringify(body), {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
 
-    console.log(data)
     // Save to DB (single-account: replace existing doc)
     await MeliToken.deleteMany({});
     const tokenDoc = new MeliToken({
@@ -48,7 +46,6 @@ export async function exchangeCodeForToken(code) {
         obtained_at: new Date()
     });
 
-    console.log(tokenDoc)
     await tokenDoc.save();
     return tokenDoc;
 }

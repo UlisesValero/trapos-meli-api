@@ -2,7 +2,7 @@ import axios from "axios";
 import { getValidAccessToken } from "./meliAuth.js";
 
 
-const API_BASE_URI = process.env.API_URI
+const MELI_API_URI = process.env.MELI_API_URI
 
 
 async function authHeaders() {
@@ -12,14 +12,22 @@ async function authHeaders() {
 
 export async function listItemsBySeller(sellerId, offset = 0, limit = 50) {
     const headers = await authHeaders();
-    const url = `${API_BASE_URI}/users/${sellerId}/items/search?offset=${offset}&limit=${limit}`;
-    const { data } = await axios.get(url, { headers });
+    const url = `${MELI_API_URI}/users/${sellerId}/items/search`;
+
+    console.log("LIST URL:", url);
+
+    const { data } = await axios.get(url,
+        {
+            headers,
+            params: { offset, limit }
+        }
+    );
     return data; // { results: [ "MLA123", "MLA456", ... ], paging: { total, offset, limit } }
 }
 
 export async function updateProduct(itemId, body) {
     const headers = await authHeaders();
-    const url = `${API_BASE_URI}/items/${itemId}`;
+    const url = `${MELI_API_URI}/items/${itemId}`;
     const { data } = await axios.put(url, body, { headers });
     return data;
 }
@@ -27,7 +35,7 @@ export async function updateProduct(itemId, body) {
 
 export async function updateDescription(itemId, plain_text) {
     const headers = await authHeaders();
-    const url = `${API_BASE_URI}/items/${itemId}/description`;
+    const url = `${MELI_API_URI}/items/${itemId}/description`;
     const { data } = await axios.put(url, { plain_text }, { headers });
     return data;
 }
@@ -35,21 +43,21 @@ export async function updateDescription(itemId, plain_text) {
 
 export async function getProduct(itemId) {
     const headers = await authHeaders();
-    const { data } = await axios.get(`${API_BASE_URI}/items/${itemId}`, { headers });
+    const { data } = await axios.get(`${MELI_API_URI}/items/${itemId}`, { headers });
     return data;
 }
 
 
 export async function createProduct(payload) {
     const headers = await authHeaders();
-    const { data } = await axios.post(`${API_BASE_URI}/items`, payload, { headers });
+    const { data } = await axios.post(`${MELI_API_URI}/items`, payload, { headers });
     return data;
 }
 
 
 export async function changePublishState(itemId, active = true) {
     const headers = await authHeaders();
-    const url = `${API_BASE_URI}/items/${itemId}`;
+    const url = `${MELI_API_URI}/items/${itemId}`;
     const body = { status: active ? 'active' : 'paused' };
     const { data } = await axios.put(url, body, { headers });
     return data;
@@ -64,7 +72,7 @@ export async function uploadImageToMeli(fileBuffer, filename) {
     form.append('file', fileBuffer, filename);
 
 
-    const res = await axios.post(`${API_BASE_URI}/pictures`, form, {
+    const res = await axios.post(`${MELI_API_URI}/pictures`, form, {
         headers: {
             ...headers,
             ...form.getHeaders()
