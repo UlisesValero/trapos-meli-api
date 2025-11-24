@@ -1,7 +1,7 @@
 import express from "express";
 import upload from "../utils/fileUploader.js";
 import * as ctrl from "../controllers/meliController.js";
-import { getAuthUrl } from "../utils/meliAuth.js";
+import { getAuthUrl, exchangeCodeForToken } from "../utils/meliAuth.js";
 
 const router = express.Router();
 
@@ -15,6 +15,7 @@ router.get("/auth/meli", (req, res) => {
 // CALLBACK OAUTH
 router.get("/auth/meli/callback", async (req, res) => {
     try {
+        console.log("CALLBACK QUERY:", req.query)
         const { code } = req.query;
         const tokenDoc = await exchangeCodeForToken(code);
         res.json({ ok: true, token: tokenDoc });

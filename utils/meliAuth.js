@@ -23,6 +23,7 @@ export function getAuthUrl() {
 
 
 export async function exchangeCodeForToken(code) {
+  console.log("paso por aca, code =", code);
     const body = {
         grant_type: "authorization_code",
         client_id: process.env.MELI_CLIENT_ID,
