@@ -11,10 +11,10 @@ async function authHeaders() {
 }
 
 export async function listItemsBySeller(sellerId, offset = 0, limit = 50) {
-  const headers = await authHeaders();
-  const url = `${API_BASE_URI}/users/${sellerId}/items/search?offset=${offset}&limit=${limit}`;
-  const { data } = await axios.get(url, { headers });
-  return data; // { results: [ "MLA123", "MLA456", ... ], paging: { total, offset, limit } }
+    const headers = await authHeaders();
+    const url = `${API_BASE_URI}/users/${sellerId}/items/search?offset=${offset}&limit=${limit}`;
+    const { data } = await axios.get(url, { headers });
+    return data; // { results: [ "MLA123", "MLA456", ... ], paging: { total, offset, limit } }
 }
 
 export async function updateProduct(itemId, body) {

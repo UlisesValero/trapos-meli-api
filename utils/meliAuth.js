@@ -54,7 +54,6 @@ export async function exchangeCodeForToken(code) {
     return tokenDoc;
 }
 
-
 export async function refreshAccessToken() {
     const token = await MeliToken.findOne();
     if (!token) throw new Error("No refresh token saved. Authorize first.");
@@ -85,13 +84,13 @@ export async function refreshAccessToken() {
 
 
 export async function getValidAccessToken() {
-    let token = await MeliToken.findOne();
-    if (!token) throw new Error("No token found. Complete OAuth flow first at /auth/meli");
+    let token = await MeliToken.findOne()
+    if (!token) throw new Error("No token found. Complete OAuth flow first at /auth/meli")
 
 
-    const obtainedAt = new Date(token.obtained_at).getTime();
-    const expiresInMs = (token.expires_in - 30) * 1000; // refresh 30s antes
+    const obtainedAt = new Date(token.obtained_at).getTime()
+    const expiresInMs = (token.expires_in - 30) * 1000
     if (Date.now() - obtainedAt >= expiresInMs) {
-        token = await refreshAccessToken();
+        token = await refreshAccessToken()
     }
 }

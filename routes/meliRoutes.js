@@ -1,9 +1,28 @@
 import express from "express";
 import upload from "../utils/fileUploader.js";
 import * as ctrl from "../controllers/meliController.js";
+import { getAuthUrl } from "../utils/meliAuth.js";
 
 const router = express.Router();
 
+router.get("/auth/meli", (req, res) => {
+    console.log("estoy acá");
+    const url = getAuthUrl();
+    console.log("aca llegue");
+    res.redirect(url); // 302 a Mercado Libre
+});
+
+// CALLBACK OAUTH
+router.get("/auth/meli/callback", async (req, res) => {
+    try {
+        const { code } = req.query;
+        const tokenDoc = await exchangeCodeForToken(code);
+        res.json({ ok: true, token: tokenDoc });
+    } catch (err) {
+        console.error(err.response?.data || err.message);
+        res.status(500).json({ error: "Error al intercambiar code por token" });
+    }
+});
 router.get("/", ctrl.listProducts);
 router.post("/products/sync", ctrl.syncProducts);
 router.put("/products/:id", ctrl.updateProduct);
