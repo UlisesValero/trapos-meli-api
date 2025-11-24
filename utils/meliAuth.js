@@ -89,4 +89,6 @@ export async function getValidAccessToken() {
     if (Date.now() - obtainedAt >= expiresInMs) {
         token = await refreshAccessToken()
     }
+
+    return token
 }

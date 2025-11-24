@@ -7,7 +7,7 @@ const MELI_API_URI = process.env.MELI_API_URI
 
 async function authHeaders() {
     const access = await getValidAccessToken();
-    return { Authorization: `Bearer ${access}` };
+    return { Authorization: `Bearer ${access.access_token}` };
 }
 
 export async function listItemsBySeller(sellerId, offset = 0, limit = 50) {
