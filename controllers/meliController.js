@@ -51,7 +51,7 @@ export const syncProducts = async (req, res) => {
                     filter: { item_id: item.id },
                     update: {
                         $set: {
-                            item_id: item.id,
+                            item_id: item.item_id,
                             title: item.title,
                             price: item.price,
                             status: item.status,
