@@ -219,7 +219,7 @@ export const uploadImage = async (req, res) => {
     }
 }
 
-export const createCustomCategory = async (req, res) => {
+export const createCategory = async (req, res) => {
     try {
         const { name, category_id } = req.body;
 
@@ -237,11 +237,25 @@ export const createCustomCategory = async (req, res) => {
 
 
 export const listUsedCategories = async (req, res) => {
-  try {
-    const categories = await ProductCache.distinct("category_id"); // ← acá va la línea
-    res.json(categories);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ error: "Error al listar categorías usadas" });
-  }
+    try {
+        const categories = await ProductCache.aggregate([
+            {
+                $group: {
+                    _id: "$category_id",
+                    products: { $push: "$title" },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    category_id: "$_id",
+                    products: 1,
+                },
+            },
+        ])
+        res.json(categories);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Error al listar categorías usadas" });
+    }
 };
