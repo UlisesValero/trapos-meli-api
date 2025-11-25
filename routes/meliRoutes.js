@@ -5,12 +5,13 @@ import { getAuthUrl, exchangeCodeForToken } from "../utils/meliAuth.js";
 
 const router = express.Router();
 
+
+router.get("/categories/used", ctrl.listUsedCategories);
+
 router.get("/auth/meli", (req, res) => {
     const url = getAuthUrl();
     res.redirect(url)
 });
-
-// CALLBACK OAUTH
 router.get("/auth/meli/callback", async (req, res) => {
     try {
         const { code } = req.query;

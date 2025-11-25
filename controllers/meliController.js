@@ -1,8 +1,8 @@
 // src/controllers/meliController.js
 import ProductCache from "../models/ProductCache.js";
+import ProductCategory from "../models/ProductCategory.js";
 import { parseProductListParams, buildProductListQuery } from '../utils/productListParams.js'
 import * as meliAPI from "../utils/meliApi.js";
-
 
 export const listProducts = async (req, res) => {
     try {
@@ -218,3 +218,30 @@ export const uploadImage = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 }
+
+export const createCustomCategory = async (req, res) => {
+    try {
+        const { name, category_id } = req.body;
+
+        if (!name || !category_id) {
+            return res.status(400).json({ error: "Faltan name o category_id" });
+        }
+
+        const doc = await ProductCategory.create({ name, category_id });
+        res.json(doc);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Error al crear categoría" });
+    }
+};
+
+
+export const listUsedCategories = async (req, res) => {
+  try {
+    const categories = await ProductCache.distinct("category_id"); // ← acá va la línea
+    res.json(categories);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Error al listar categorías usadas" });
+  }
+};
