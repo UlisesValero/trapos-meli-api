@@ -8,6 +8,8 @@ const router = express.Router();
 
 router.get("/categories/used", ctrl.listUsedCategories);
 router.post('/categories/add', ctrl.createCategory)
+router.get("/categories/debug", ctrl.debugCategories);
+
 router.get("/auth/meli", (req, res) => {
     const url = getAuthUrl();
     res.redirect(url)

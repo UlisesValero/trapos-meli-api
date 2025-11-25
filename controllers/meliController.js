@@ -3,6 +3,8 @@ import ProductCache from "../models/ProductCache.js";
 import ProductCategory from "../models/ProductCategory.js";
 import { parseProductListParams, buildProductListQuery } from '../utils/productListParams.js'
 import * as meliAPI from "../utils/meliApi.js";
+import axios from "axios";
+
 
 export const listProducts = async (req, res) => {
     try {
@@ -259,3 +261,26 @@ export const listUsedCategories = async (req, res) => {
         res.status(500).json({ error: "Error al listar categorías usadas" });
     }
 };
+const MELI_API_URI = process.env.MELI_API_URI
+
+export async function debugCategories(req, res) {
+  try {
+    const categoryIds = await ProductCache.distinct("category_id");
+
+    const result = [];
+
+    for (const catId of categoryIds) {
+      const { data } = await axios.get(`${MELI_API_URI}/categories/${catId}`);
+      result.push({
+        category_id: catId,
+        name: data.name,
+        path: data.path_from_root.map((n) => n.name).join(" > "),
+      });
+    }
+
+    res.json(result);
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    res.status(500).json({ error: "Error al inspeccionar categorías" });
+  }
+}
