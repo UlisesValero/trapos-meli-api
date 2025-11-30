@@ -264,77 +264,78 @@ export const listUsedCategories = async (req, res) => {
 const MELI_API_URI = process.env.MELI_API_URI
 
 export async function debugCategories(req, res) {
-  try {
-    const categoryIds = await ProductCache.distinct("category_id");
+    try {
+        const categoryIds = await ProductCache.distinct("category_id");
 
-    const result = [];
+        const result = [];
 
-    for (const catId of categoryIds) {
-      const { data } = await axios.get(`${MELI_API_URI}/categories/${catId}`);
-      result.push({
-        category_id: catId,
-        name: data.name,
-        path: data.path_from_root.map((n) => n.name).join(" > "),
-      });
+        for (const catId of categoryIds) {
+            const { data } = await axios.get(`${MELI_API_URI}/categories/${catId}`);
+            result.push({
+                category_id: catId,
+                name: data.name,
+                path: data.path_from_root.map((n) => n.name).join(" > "),
+            });
+        }
+
+        res.json(result);
+    } catch (err) {
+        console.error(err.response?.data || err.message);
+        res.status(500).json({ error: "Error al inspeccionar categorías" });
     }
-
-    res.json(result);
-  } catch (err) {
-    console.error(err.response?.data || err.message);
-    res.status(500).json({ error: "Error al inspeccionar categorías" });
-  }
 }
 
 export async function validateCategory(req, res) {
-  try {
-    const categoryId = req.params.categoryId;
+    try {
+        const categoryId = req.params.categoryId;
 
-    if (!categoryId) {
-      return res.status(400).json({ error: "categoryId requerido" });
+        if (!categoryId) {
+            return res.status(400).json({ error: "categoryId requerido" });
+        }
+
+        // 1. datos de categoría
+        const { data: category } = await axios.get(
+            `${MELI_API_URI}/categories/${categoryId}`
+        );
+
+        // 2. atributos de categoría
+        const { data: attributes } = await axios.get(
+            `${MELI_API_URI}/categories/${categoryId}/attributes`
+        );
+
+        // 3. filtrar obligatorios
+        const requiredAttributes = attributes.filter((attr) => {
+            const tags = Array.isArray(attr.tags) ? attr.tags : [];
+            return tags.includes("required") || tags.includes("new_required");
+        });
+
+        // 4. Formato limpio para tu UI y validación
+        const formattedRequired = requiredAttributes.map((a) => ({
+            id: a.id,
+            name: a.name,
+            type: a.value_type,
+            tags: Array.isArray(a.tags) ? a.tags : [],
+            values_allowed: Array.isArray(a.values)
+                ? a.values.map((v) => ({
+                    id: v.id,
+                    name: v.name,
+                }))
+                : [],
+        }));
+
+        return res.json({
+            category_id: category.id,
+            name: category.name,
+            full_path: category.path_from_root.map((n) => n.name).join(" > "),
+            total_attributes: attributes.length,
+            required_count: formattedRequired.length,
+            required_attributes: formattedRequired,
+        });
+    } catch (err) {
+        console.error(err.response?.data || err.message);
+        return res.status(500).json({
+            error: "Error al validar categoría",
+            detail: err.response?.data || err.message,
+        });
     }
-
-    // 1. datos de categoría
-    const { data: category } = await axios.get(
-      `${MELI_API_URI}/categories/${categoryId}`
-    );
-
-    // 2. atributos de categoría
-    const { data: attributes } = await axios.get(
-      `${MELI_API_URI}/categories/${categoryId}/attributes`
-    );
-
-    // 3. filtrar obligatorios
-    const requiredAttributes = attributes.filter((attr) =>
-      (attr.tags || []).some((tag) =>
-        ["required", "new_required"].includes(tag)
-      )
-    );
-
-    // 4. Formato limpio para tu UI y validación
-    const formattedRequired = requiredAttributes.map((a) => ({
-      id: a.id,
-      name: a.name,
-      type: a.value_type,
-      tags: a.tags,
-      values_allowed: a.values?.map((v) => ({
-        id: v.id,
-        name: v.name,
-      })),
-    }));
-
-    return res.json({
-      category_id: category.id,
-      name: category.name,
-      full_path: category.path_from_root.map((n) => n.name).join(" > "),
-      total_attributes: attributes.length,
-      required_count: formattedRequired.length,
-      required_attributes: formattedRequired,
-    });
-  } catch (err) {
-    console.error(err.response?.data || err.message);
-    return res.status(500).json({
-      error: "Error al validar categoría",
-      detail: err.response?.data || err.message,
-    });
-  }
 }
