@@ -8,10 +8,11 @@ const ProductCategorySchema = new mongoose.Schema({
     category_id: {
         type: String,
         required: true,
-    }},
-{
-    collection: "ProductCategory",
-  }
+    }
+},
+    {
+        collection: "ProductCategory",
+    }
 );
 
 const ProductCategory = mongoose.model("ProductCategory", ProductCategorySchema)
