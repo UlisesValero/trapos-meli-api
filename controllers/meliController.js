@@ -154,21 +154,24 @@ export const updateDescription = async (req, res) => {
 }
 
 export async function createProduct(req, res) {
-  try {
-    const out = await createProductService(req.body);
-    res.json(out);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    console.log(req.body)
+    try {
+        const payload = req.body
+        console.log("PAYLOAD", payload)
+        const out = await createProductService(payload)
+        res.json(out);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 }
 
 export async function validateCategory(req, res) {
-  try {
-    const out = await validateCategoryService(req.params.categoryId);
-    res.json(out);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    try {
+        const out = await validateCategoryService(req.params.categoryId);
+        res.json(out);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 }
 
 export const changePublishState = async (req, res) => {
