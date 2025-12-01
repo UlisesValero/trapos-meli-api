@@ -42,9 +42,11 @@ export async function validateCategoryService(categoryId) {
 }
 
 export async function createProductService(payload) {
+  console.log(payload)
   const draft = new ProductCreatePayload(payload);
   await draft.validate();
   const structured = draft.toObject();
+  console.log(structured)
 
   const categoryId = structured.category_id;
   const { required } = await getRequiredAttributes(categoryId);
