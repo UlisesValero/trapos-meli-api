@@ -12,7 +12,7 @@ app.use(express.json())
 
 connectDB()
 
-app.use('/meli', meliRoutes)
+app.use('/api', meliRoutes)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
