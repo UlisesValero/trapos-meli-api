@@ -152,31 +152,22 @@ export const updateDescription = async (req, res) => {
     }
 }
 
-export const createProduct = async (req, res) => {
-    const payload = req.body; // payload según docs de Meli
+export async function createProduct(req, res) {
+  try {
+    const out = await createProductService(req.body);
+    res.json(out);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
 
-    try {
-        const data = await meliAPI.createProduct(payload);
-
-        // opcional: guardarlo en caché
-        await ProductCache.findOneAndUpdate(
-            { item_id: data.id },
-            {
-                item_id: data.id,
-                title: data.title,
-                price: data.price,
-                status: data.status,
-                available_quantity: data.available_quantity,
-                updated_at: new Date(),
-            },
-            { upsert: true }
-        );
-
-        res.json(data);
-    } catch (err) {
-        console.error(err.response?.data || err.message);
-        res.status(500).json({ error: err.message });
-    }
+export async function validateCategory(req, res) {
+  try {
+    const out = await validateCategoryService(req.params.categoryId);
+    res.json(out);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 }
 
 export const changePublishState = async (req, res) => {
@@ -282,60 +273,5 @@ export async function debugCategories(req, res) {
     } catch (err) {
         console.error(err.response?.data || err.message);
         res.status(500).json({ error: "Error al inspeccionar categorías" });
-    }
-}
-
-export async function validateCategory(req, res) {
-    try {
-        const categoryId = req.params.categoryId;
-
-        if (!categoryId) {
-            return res.status(400).json({ error: "categoryId requerido" });
-        }
-
-        // 1. datos de categoría
-        const { data: category } = await axios.get(
-            `${MELI_API_URI}/categories/${categoryId}`
-        );
-
-        // 2. atributos de categoría
-        const { data: attributes } = await axios.get(
-            `${MELI_API_URI}/categories/${categoryId}/attributes`
-        );
-
-        // 3. filtrar obligatorios
-        const requiredAttributes = attributes.filter((attr) => {
-            const tags = Array.isArray(attr.tags) ? attr.tags : [];
-            return tags.includes("required") || tags.includes("new_required");
-        });
-
-        // 4. Formato limpio para tu UI y validación
-        const formattedRequired = requiredAttributes.map((a) => ({
-            id: a.id,
-            name: a.name,
-            type: a.value_type,
-            tags: Array.isArray(a.tags) ? a.tags : [],
-            values_allowed: Array.isArray(a.values)
-                ? a.values.map((v) => ({
-                    id: v.id,
-                    name: v.name,
-                }))
-                : [],
-        }));
-
-        return res.json({
-            category_id: category.id,
-            name: category.name,
-            full_path: category.path_from_root.map((n) => n.name).join(" > "),
-            total_attributes: attributes.length,
-            required_count: formattedRequired.length,
-            required_attributes: formattedRequired,
-        });
-    } catch (err) {
-        console.error(err.response?.data || err.message);
-        return res.status(500).json({
-            error: "Error al validar categoría",
-            detail: err.response?.data || err.message,
-        });
     }
 }
