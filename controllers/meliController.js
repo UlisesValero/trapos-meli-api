@@ -4,6 +4,7 @@ import ProductCategory from "../models/ProductCategory.js";
 import { parseProductListParams, buildProductListQuery } from '../utils/productListParams.js'
 import * as meliAPI from "../utils/meliApi.js";
 import axios from "axios";
+import { createProductService } from '../utils/validations.js'
 
 
 export const listProducts = async (req, res) => {

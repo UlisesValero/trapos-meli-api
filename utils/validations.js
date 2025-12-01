@@ -1,7 +1,7 @@
 import axios from "axios";
 import ProductCache from "../models/ProductCache.js";
 import ProductCreatePayload from "../models/ProductCreatePayload.js";
-import { meliAPI } from './meliApi.js'
+import { createProduct } from './meliApi.js'
 
 
 const MELI_API_URI = process.env.MELI_API_URI;
@@ -58,7 +58,7 @@ export async function createProductService(payload) {
     if (!ok) throw new Error(`Falta atributo obligatorio: ${r.id}`);
   }
 
-  const data = await meliAPI.createProduct(structured);
+  const data = await createProduct(structured);
 
   await ProductCache.findOneAndUpdate(
     { item_id: data.id },

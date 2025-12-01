@@ -32,7 +32,6 @@ export async function updateProduct(itemId, body) {
     return data;
 }
 
-
 export async function updateDescription(itemId, plain_text) {
     const headers = await authHeaders();
     const url = `${MELI_API_URI}/items/${itemId}/description`;
@@ -40,20 +39,17 @@ export async function updateDescription(itemId, plain_text) {
     return data;
 }
 
-
 export async function getProduct(itemId) {
     const headers = await authHeaders();
     const { data } = await axios.get(`${MELI_API_URI}/items/${itemId}`, { headers });
     return data;
 }
 
-
 export async function createProduct(payload) {
     const headers = await authHeaders();
     const { data } = await axios.post(`${MELI_API_URI}/items`, payload, { headers });
     return data;
 }
-
 
 export async function changePublishState(itemId, active = true) {
     const headers = await authHeaders();
@@ -62,7 +58,6 @@ export async function changePublishState(itemId, active = true) {
     const { data } = await axios.put(url, body, { headers });
     return data;
 }
-
 
 export async function uploadImageToMeli(fileBuffer, filename) {
     // Mercado Libre requires uploading to images endpoint via multipart. The simpler
