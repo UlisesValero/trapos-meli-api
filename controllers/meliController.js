@@ -5,7 +5,7 @@ import { parseProductListParams, buildProductListQuery } from '../utils/productL
 import * as meliAPI from "../utils/meliApi.js";
 import axios from "axios";
 import { createProductService } from '../utils/validations.js'
-
+import { uploadImageToR2 } from "../utils/r2Storage.js";
 
 export const listProducts = async (req, res) => {
     try {
@@ -204,20 +204,20 @@ export const changePublishState = async (req, res) => {
 }
 
 export const uploadImage = async (req, res) => {
-    try {
-        if (!req.file) return res.status(400).send("No file");
+  try {
+    if (!req.file) return res.status(400).send("No file");
 
-        const result = await meliAPI.uploadImageToMeli(
-            req.file.buffer,
-            req.file.originalname
-        );
+    const { url, key } = await uploadImageToR2(
+      req.file.buffer,
+      req.file.originalname
+    );
 
-        res.json(result);
-    } catch (err) {
-        console.error(err.response?.data || err.message);
-        res.status(500).json({ error: err.message });
-    }
-}
+    res.json({ url, key });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
 
 export const createCategory = async (req, res) => {
     try {
