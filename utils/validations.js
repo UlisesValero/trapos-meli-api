@@ -42,17 +42,34 @@ export async function validateCategoryService(categoryId) {
 }
 
 export async function createProductService(payload) {
-  console.log(payload)
+  console.log(payload);
+
   const draft = new ProductCreatePayload(payload);
   await draft.validate();
-  const structured = draft.toObject();
-  console.log(structured)
 
-  const categoryId = structured.category_id;
+  // toObject sin __v
+  const structured = draft.toObject({ versionKey: false });
+  console.log("STRUCTURED BEFORE CLEAN:", structured);
+
+  // Sacamos _id y logistic_type del body que va a MELI
+  const { _id, logistic_type, ...meliPayload } = structured;
+
+  // Mapear logistic_type a la estructura que MELI sí entiende
+  // MELI usa: shipping.mode = "me2" | "self_service" | "fulfillment" | etc.
+  if (logistic_type) {
+    meliPayload.shipping = {
+      ...(meliPayload.shipping || {}),
+      mode: logistic_type,
+    };
+  }
+
+  console.log("PAYLOAD TO MELI:", meliPayload);
+
+  const categoryId = meliPayload.category_id;
   const { required } = await getRequiredAttributes(categoryId);
 
-  const sent = Array.isArray(structured.attributes)
-    ? structured.attributes
+  const sent = Array.isArray(meliPayload.attributes)
+    ? meliPayload.attributes
     : [];
 
   for (const r of required) {
@@ -60,7 +77,8 @@ export async function createProductService(payload) {
     if (!ok) throw new Error(`Falta atributo obligatorio: ${r.id}`);
   }
 
-  const data = await createProduct(structured);
+  // Acá ya no va ni _id ni logistic_type
+  const data = await createProduct(meliPayload);
 
   await ProductCache.findOneAndUpdate(
     { item_id: data.id },
