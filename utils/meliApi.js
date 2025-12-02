@@ -46,9 +46,15 @@ export async function getProduct(itemId) {
 }
 
 export async function createProduct(payload) {
+  try {
     const headers = await authHeaders();
     const { data } = await axios.post(`${MELI_API_URI}/items`, payload, { headers });
     return data;
+
+  } catch (err) {
+    console.error("ERROR MELI:", err.response?.data || err.message);
+    throw err;
+  }
 }
 
 export async function changePublishState(itemId, active = true) {

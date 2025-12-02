@@ -161,7 +161,10 @@ export async function createProduct(req, res) {
         const out = await createProductService(payload)
         res.json(out);
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        console.error("CREATE PRODUCT ERROR:", err.response?.data || err.message);
+        res.status(500).json({
+            error: err.response?.data || err.message
+        });
     }
 }
 
