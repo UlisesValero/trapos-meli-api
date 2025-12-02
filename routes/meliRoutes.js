@@ -10,6 +10,16 @@ router.get("/categories/used", ctrl.listUsedCategories);
 router.post('/categories/add', ctrl.createCategory)
 router.get("/categories/debug", ctrl.debugCategories);
 router.get('/validate-category/:categoryId', ctrl.validateCategory)
+router.get("/category/:id/required-attributes", async (req, res) => {
+  try {
+    const categoryId = req.params.id;
+    const { required } = await getRequiredAttributes(categoryId);
+    res.json(required);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 router.get("/auth/meli", (req, res) => {
     const url = getAuthUrl();

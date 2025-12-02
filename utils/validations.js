@@ -7,38 +7,56 @@ import { createProduct } from './meliApi.js'
 const MELI_API_URI = process.env.MELI_API_URI;
 
 export async function getRequiredAttributes(categoryId) {
-    const { data: attributes } = await axios.get(
-        `${MELI_API_URI}/categories/${categoryId}/attributes`
-    );
+  const { data: attributes } = await axios.get(
+    `${MELI_API_URI}/categories/${categoryId}/attributes`
+  );
 
-    const required = attributes.filter((attr) => {
-        const tags = Array.isArray(attr.tags) ? attr.tags : [];
-        return tags.includes("required") || tags.includes("new_required");
-    });
+  const REQUIRED_TAGS = [
+    "required",
+    "new_required",
+    "conditional_required",
+    "required_for_publication",
+    "technical_spec",
+    "required_technical",
+    "catalog_required",
+  ];
 
-    return {
-        rawAttributes: attributes,
-        required: required.map((a) => ({
-            id: a.id,
-            type: a.value_type,
-        })),
-    };
+  const required = attributes.filter((attr) => {
+    const tags = Array.isArray(attr.tags) ? attr.tags : [];
+    return tags.some((tag) => REQUIRED_TAGS.includes(tag));
+  });
+
+  return {
+    rawAttributes: attributes,
+    required: required.map((a) => ({
+      id: a.id,
+      name: a.name,
+      type: a.value_type,
+      tags: Array.isArray(a.tags) ? a.tags : [],
+      values_allowed: Array.isArray(a.values)
+        ? a.values.map((v) => ({
+            id: v.id,
+            name: v.name,
+          }))
+        : [],
+    })),
+  };
 }
 
 export async function validateCategoryService(categoryId) {
-    const { data: category } = await axios.get(
-        `${MELI_API_URI}/categories/${categoryId}`
-    );
+  const { data: category } = await axios.get(
+    `${MELI_API_URI}/categories/${categoryId}`
+  );
 
-    const { rawAttributes, required } = await getRequiredAttributes(categoryId);
+  const { rawAttributes, required } = await getRequiredAttributes(categoryId);
 
-    return {
-        category_id: category.id,
-        name: category.name,
-        path: category.path_from_root.map((n) => n.name).join(" > "),
-        total_attributes: rawAttributes.length,
-        required_attributes: required,
-    };
+  return {
+    category_id: category.id,
+    name: category.name,
+    path: category.path_from_root.map((n) => n.name).join(" > "),
+    total_attributes: rawAttributes.length,
+    required_attributes: required,
+  };
 }
 
 export async function createProductService(payload) {
@@ -77,7 +95,6 @@ export async function createProductService(payload) {
     if (!ok) throw new Error(`Falta atributo obligatorio: ${r.id}`);
   }
 
-  // Acá ya no va ni _id ni logistic_type
   const data = await createProduct(meliPayload);
 
   await ProductCache.findOneAndUpdate(
